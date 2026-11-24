@@ -10,8 +10,10 @@ Masaüstünün kenarında duran, projenin aktif milestone'unu gösteren küçük
 - **Widget (Electron)**: dosyayı okur, taşı çizer, + / − ve mühürleme işlemlerini dosyaya yazar. Dosya dışarıdan değişirse kendini yeniler.
   - `main.js`: şeffaf, çerçevesiz, sağ alt köşede duran pencere; taşın dışında kalan alanda tıklamalar masaüstüne geçer.
   - `preload.js`: arayüz ile dosya sistemi arasındaki köprü.
+  - `store.js`: dosyayı güvenle okuyup atomik yazan katman (bozuk JSON'da çökmez, yedek tutar). `npm test` ile denenir.
   - `index.html`: taş tasarımı (SVG), büyüme ve dönme animasyonu, mantık.
-- **Skill (henüz yok)**: Claude ile konuşurken aynı JSON dosyasını okuyup yazar. "M0 bitti" denince retroyu yürütür ve taşı mühürler.
+- **Şema**: `SCHEMA.md` ve `milestones.schema.json` (sürüm 1).
+- **Skill v0** (`skills/milestone-stone`): Claude ile konuşurken aynı JSON dosyasını okuyup yazar. "M0 bitti" denince retroyu yürütür ve taşı mühürler; PROJE.md'den ya da konuşmadan plan çıkarabilir. `scripts/stone.js` dosyayı doğrulayıp atomik yazar.
 
 ## Tasarım kararları
 
@@ -24,10 +26,12 @@ Masaüstünün kenarında duran, projenin aktif milestone'unu gösteren küçük
 
 **v0.1 (2026-11-21):** Widget çalışıyor; headless Chromium'da test edildi. Gerçek Windows'ta henüz denenmedi.
 
+**v0.2 (2026-11-24):** Bozuk/yarım JSON'a dayanıklılık, atomik yazma, içeriğe dayalı dış değişiklik algılama; yazılı şema; Skill v0. Widget ile skill'in birlikte çalışması gerçek Windows'ta henüz denenmedi.
+
 ## Yol haritası (öncelik sırasıyla)
 
 1. **Windows'ta gerçek test**: şeffaflık, tıklama geçişi, alwaysOnTop davranışı.
-2. **Skill v0**: JSON'u okuma, retroyu sohbetle yürütme, mühürleme ve bir sonraki milestone'un "bitti" tanımını hatırlatma.
+2. ~~**Skill v0**~~ (v0.2'de yapıldı). Sıradaki: **bulut projeleri için GitHub'dan çekme** — widget dosyayı bir depodan okusun (şema buna hazır, bkz. SCHEMA.md).
 3. **Taşı sürükleyip konumlandırma**, konumu ayarlarda saklama.
 4. **Windows açılışında otomatik başlatma.**
 5. **Mühürleme anı**: daha güçlü bir parlama ve kısa bir ses (isteğe bağlı).
