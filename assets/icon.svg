@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- Milestone Stone app icon: the same original stone as the widget, simplified to read at 16 px. -->
+  <defs>
+    <linearGradient id="stone" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b1aba2"/>
+      <stop offset=".55" stop-color="#857f77"/>
+      <stop offset="1" stop-color="#55514b"/>
+    </linearGradient>
+    <linearGradient id="sash" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d23c2f"/>
+      <stop offset="1" stop-color="#7c1a12"/>
+    </linearGradient>
+    <radialGradient id="carve" cx=".5" cy=".6" r=".6">
+      <stop offset="0" stop-color="#5f5a53"/>
+      <stop offset="1" stop-color="#34312d"/>
+    </radialGradient>
+    <clipPath id="clip"><path id="shape" d="M58 246 C38 196 30 140 44 96 C58 50 92 12 132 10 C172 8 204 46 214 92 C226 146 222 200 204 246 Q131 254 58 246 Z"/></clipPath>
+  </defs>
+  <use href="#shape" fill="url(#stone)"/>
+  <g clip-path="url(#clip)">
+    <path d="M214 92 C226 146 222 200 204 246 L256 246 L256 0 Z" fill="rgba(0,0,0,.22)"/>
+    <path d="M42 84 C70 92 70 40 120 26" stroke="rgba(255,255,255,.16)" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <path d="M20 200 Q128 178 236 160 L236 190 Q128 206 20 228 Z" fill="url(#sash)"/>
+  </g>
+  <use href="#shape" fill="none" stroke="#2a2723" stroke-width="7"/>
+  <circle cx="128" cy="112" r="50" fill="url(#carve)" stroke="#2a2723" stroke-width="5"/>
+  <circle cx="128" cy="112" r="38" fill="none" stroke="#ffb54a" stroke-width="12" stroke-linecap="round"
+          stroke-dasharray="160 239" transform="rotate(-90 128 112)"/>
+</svg>

@@ -13,6 +13,9 @@ Masaüstünün kenarında duran, projenin aktif milestone'unu gösteren küçük
   - `store.js`: dosyayı güvenle okuyup atomik yazan katman (bozuk JSON'da çökmez, yedek tutar). `npm test` ile denenir.
   - `remote.js`: isteğe bağlı GitHub modu. `config.json` varsa dosyayı depodan çekip yerel dosyanın üstüne yazar; yerel dosya önbellek olarak kalır.
   - `index.html`: taş tasarımı (SVG), büyüme ve dönme animasyonu, mantık.
+  - `prefs.js`: bu bilgisayara özel pencere ayarları (`prefs.json`: boyut, üstte tutma, gizli, bildirim). `milestones.json`'dan ayrı, çünkü GitHub modunda o dosya depodan gelir.
+  - `notify.js`: dışarıdan tamamlanan milestone'u bulur ve motive edici bildirim metnini seçer.
+  - `assets/`: uygulama simgesi (`icon.svg` kaynak; `icon.ico` tepsi ve ileride .exe için, `icon.png` bildirim için).
 - **Şema**: `SCHEMA.md` ve `milestones.schema.json` (sürüm 1).
 - **Skill v0** (`skills/milestone-stone`): Claude ile konuşurken aynı JSON dosyasını okuyup yazar. "M0 bitti" denince retroyu yürütür ve taşı mühürler; PROJE.md'den ya da konuşmadan plan çıkarabilir. `scripts/stone.js` dosyayı doğrulayıp atomik yazar.
 
@@ -22,6 +25,9 @@ Masaüstünün kenarında duran, projenin aktif milestone'unu gösteren küçük
 - Tarih yok, milestone var. Hedef, milestone'ların "bitti" tanımlarını tamamlamak.
 - Yuvarlağın etrafındaki halka ilerlemeyi gösteriyor. 5 gün ilerleme olmazsa nabız gibi atıyor (`staleDays` ayarı).
 - Duraklatma birinci sınıf bir durum: kullanıcı ilerlemeyen bir işi suçluluk duymadan durdurabilmeli.
+- Taş varsayılan olarak üstte durmaz; masaüstünde bekler, tepsiden öne çağrılır. Yer işgal etmemeli.
+- Uygulama simgesi taşın kendisinin sadeleştirilmiş hali (aynı özgün tasarım), 16 px'te de okunacak şekilde.
+- Bildirim yalnızca dışarıdan gelen tamamlanmada gider; kullanıcı taşın üstündeyken zaten görüyor.
 
 ## Durum
 
@@ -31,12 +37,14 @@ Masaüstünün kenarında duran, projenin aktif milestone'unu gösteren küçük
 
 **v0.3 (2026-11-24):** GitHub modu: `config.json` ile widget dosyayı bir GitHub deposundan birkaç dakikada bir çeker (`remote.js`, ETag ile hafif). Skill bulutta dosyayı commit'le günceller. Yerel mod aynen çalışıyor. Gerçek bir depoyla Windows'ta henüz denenmedi.
 
+**v0.4 (2026-11-24):** Tepsi simgesi ve menüsü (göster/gizle, boyut ön ayarları ve Ctrl + tekerlek, her zaman üstte, Windows açılınca başlat, bildirim, kapat), taş simgesi, tamamlanma bildirimi, tek örnek kilidi, özel depo için token adımları. Windows'ta henüz denenmedi.
+
 ## Yol haritası (öncelik sırasıyla)
 
 1. **Windows'ta gerçek test**: şeffaflık, tıklama geçişi, alwaysOnTop davranışı.
 2. ~~**Skill v0**~~ (v0.2) ve ~~**GitHub'dan çekme**~~ (v0.3) yapıldı. İleride belki: taştaki tikleri de depoya yazmak (token'a yazma izni gerekir). Şimdilik taş depoya yazmaz, yerel tikler çekmede korunur.
-3. **Taşı sürükleyip konumlandırma**, konumu ayarlarda saklama.
-4. **Windows açılışında otomatik başlatma.**
+3. **Taşı sürükleyip konumlandırma**, konumu `prefs.json`'da saklama.
+4. ~~**Windows açılışında otomatik başlatma**~~, tepsi, boyut ve bildirim (v0.4) yapıldı.
 5. **Mühürleme anı**: daha güçlü bir parlama ve kısa bir ses (isteğe bağlı).
 6. **Birden fazla proje**: proje başına bir taş ya da yan yana dizilmiş taşlar.
 7. **Retro geçmişi**: mühürlenmiş taşların notlarını bir arada görmek.

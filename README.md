@@ -1,4 +1,4 @@
-# Milestone Taşı (v0.2)
+# Milestone Taşı (v0.4)
 
 Masaüstünün sağ alt köşesinde duran küçük bir taş. Ortasındaki yuvarlakta aktif milestone'un numarası yazar.
 
@@ -20,7 +20,26 @@ npm start
 - **Duraklat / Devam et:** taşı duraklatır. Duraklatılan taş grileşir.
 - Bütün maddeler + olunca **geriye bakış** kutusu ve **Mühürle** düğmesi çıkar. Mühürlenen taş parlar ve sıradaki milestone açılır.
 - Aktif taşta 5 gün boyunca ilerleme olmazsa halka yavaşça nabız gibi atmaya başlar.
-- **↺:** taşı geri çevirir. **taşı kapat:** uygulamadan çıkar.
+- **↺:** taşı geri çevirir. **taşı gizle:** taşı ekrandan kaldırır, uygulama tepside çalışmaya devam eder.
+
+## Tepsi menüsü
+
+Taş açıkken görev çubuğunda, saatin yanındaki gizli simgeler (^) arasında taş simgesi durur. Simgeye sol tıklayınca taş öne gelir. Sağ tıklayınca menü açılır:
+
+- **Taşı göster / gizle**
+- **Boyut:** Küçük (%75), Orta (%100), Büyük (%130). İnce ayar için farenin imleci taşın üstündeyken **Ctrl + fare tekerleği** (%50 ile %200 arası, %5 adımlarla).
+- **Her zaman üstte tut:** kapalıyken (varsayılan) taş masaüstünde durur ve açtığın pencerelerin arkasında kalır. Görmek istediğinde simgeye tıkla.
+- **Windows açılınca başlat**
+- **Tamamlanınca bildirim gönder:** taş bir milestone'un bütün maddelerinin tamamlandığını dışarıdan öğrendiğinde (skill, GitHub ya da dosyayı elle düzenleme) motive edici bir Windows bildirimi gönderir. Bildirime tıklayınca taş açılır ve mühürlemeye hazır olur. Taşın üstünde kendin tiklediğinde bildirim gelmez, çünkü Mühürle düğmesi zaten çıkar.
+- **Bildirimi dene:** bildirimlerin çalıştığını görmek için örnek bir bildirim gösterir.
+- **GitHub'dan şimdi çek** (yalnızca GitHub modunda)
+- **Taşı kapat:** uygulamadan çıkar.
+
+Bu ayarlar `%USERPROFILE%\.milestone-stone\prefs.json` dosyasında saklanır. `milestones.json` içindeki eski `settings.alwaysOnTop` ayarı artık kullanılmıyor.
+
+`npm start` ile çalışırken **Windows açılınca başlat**, bu klasördeki Electron'u başlatır; klasörü taşırsan seçeneği kapatıp yeniden aç.
+
+**Bildirim gelmiyorsa:** Windows ayarlarında bildirimlerin ve "Rahatsız etmeyin" modunun durumuna bak. `npm start` ile çalışırken bildirim yine de gelmezse `node_modules\electron\dist\electron.exe` dosyasına sağ tıklayıp "Başlat'a sabitle" de; Windows bazı sürümlerde bildirim için Başlat menüsünde bir kayıt istiyor.
 
 ## Veri
 
@@ -31,8 +50,9 @@ Durum şu dosyada tutulur: `%USERPROFILE%\.milestone-stone\milestones.json`
 Dosya bozulursa ya da yarım kaydedilirse taş çökmez, son geçerli hali göstermeye devam eder. Açılışta bozuk bulunan dosya `milestones.json.corrupt-<zaman>` adıyla kenara alınır ve `milestones.json.bak` yedeğinden devam edilir.
 
 Ayarlar (`settings`):
-- `alwaysOnTop`: `false` yaparsan taş pencerelerin arkasında kalır.
 - `staleDays`: halkanın kaç gün ilerleme olmayınca nabız atmaya başlayacağı.
+
+Pencereyle ilgili ayarlar (boyut, üstte tutma) tepsi menüsünde.
 
 ## GitHub modu (bulut projeleri için)
 
@@ -45,8 +65,24 @@ copy config.example.json %USERPROFILE%\.milestone-stone\config.json
 ```
 
 2. İçindeki `repo` alanını kendi deponla (`sahip/ad`) değiştir. Dosya depoda başka bir yerdeyse `path`, başka daldaysa `branch` alanını düzelt. `intervalMinutes` kaç dakikada bir bakılacağı (en az 1, varsayılan 5).
-3. Depo özelse `token` alanına bir fine-grained token yaz (yalnızca o depo, "Contents: Read-only" izni yeter). İstersen token'ı dosya yerine `MILESTONE_STONE_GITHUB_TOKEN` ortam değişkeniyle de verebilirsin.
+3. Depo özelse (private) bir token gerekir, aşağıya bak.
 4. Taşı yeniden başlat.
+
+### Özel (private) depo
+
+Taş özel depodaki dosyayı okumak için yalnızca okuma izni olan bir token kullanır:
+
+1. GitHub'da **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**.
+2. **Repository access:** "Only select repositories" seç ve yalnızca veri deposunu işaretle.
+3. **Permissions → Repository permissions → Contents:** "Read-only". Başka izin verme.
+4. Bir son kullanma tarihi seç ve token'ı oluştur.
+5. Token'ı `config.json` içindeki `token` alanına yapıştır. İstersen dosyaya yazmak yerine ortam değişkeni olarak ver (cmd'de bir kez, sonra taşı yeniden başlat):
+
+```
+setx MILESTONE_STONE_GITHUB_TOKEN "github_pat_..."
+```
+
+Token yanlışsa ya da süresi dolduysa taş son geçerli hali göstermeye devam eder ve nedenini terminale yazar (401: token yanlış ya da süresi dolmuş; 404: depo, yol ya da dal yanlış veya token o depoyu göremiyor). Token yalnızca senin bilgisayarında durur; `config.json` dosyasını bir depoya koyma.
 
 Ağ yoksa ya da GitHub hata verirse taş son geçerli hali göstermeye devam eder. Depodaki dosya şemaya uymuyorsa uygulanmaz. Taş GitHub'a hiçbir şey yazmaz. Taşa attığın + tikleri hiçbir zaman silinmez: depodan yeni bir plan gelse de, taşı yeniden başlatsan da tikli maddeler tikli kalır (milestone id'si ve madde metniyle eşleşir). Depoda tiklenen maddeler de taşa gelir. Yerelde bir tiki geri alırsan ama depoda tikliyse, depodaki tik geri gelir.
 

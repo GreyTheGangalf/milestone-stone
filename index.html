@@ -179,7 +179,7 @@
             <button class="btn" id="pause">Duraklat</button>
             <button class="btn seal hidden" id="seal">Mühürle</button>
           </div>
-          <div class="quit" id="quit">taşı kapat</div>
+          <div class="quit" id="hideStone" title="Taş tepside (saatin yanındaki gizli simgeler) durmaya devam eder">taşı gizle</div>
         </div>
       </div>
     </div>
@@ -298,13 +298,21 @@ $('seal').onclick = () => {
 $('prev').onclick = e => { e.stopPropagation(); if (view > 0) { view--; renderBack(); } };
 $('next').onclick = e => { e.stopPropagation(); if (view < state.milestones.length - 1) { view++; renderBack(); } };
 $('flipBack').onclick = e => { e.stopPropagation(); card.classList.remove('open'); };
-$('quit').onclick = () => { if (api) api.quit(); };
+$('hideStone').onclick = e => {
+  e.stopPropagation();
+  card.classList.remove('open');
+  if (api) { api.setIgnore(true); api.hide(); }
+};
 
-card.addEventListener('click', (e) => {
-  if (card.classList.contains('open') || e.target.closest('.back')) return;
+function openCard() {
   view = Math.min(state.current, state.milestones.length - 1);
   renderBack();
   card.classList.add('open');
+}
+
+card.addEventListener('click', (e) => {
+  if (card.classList.contains('open') || e.target.closest('.back')) return;
+  openCard();
 });
 
 // Electron: taşın dışı tıklanabilir masaüstü olarak kalsın
@@ -312,6 +320,7 @@ if (api) {
   card.addEventListener('mouseenter', () => api.setIgnore(false));
   card.addEventListener('mouseleave', () => api.setIgnore(true));
   api.onExternalChange(async () => { state = await load(); render(); });
+  api.onOpenCard(() => { if (state) openCard(); });
 }
 
 (async () => {
