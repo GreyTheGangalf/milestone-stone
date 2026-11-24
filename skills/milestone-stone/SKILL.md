@@ -1,6 +1,6 @@
 ---
 name: milestone-stone
-description: Reads and updates the milestones.json file of the Milestone Stone desktop widget. Use when the user says things like "M3 is done" / "M3 bitti", marks a checklist item as done, pauses or resumes a milestone, asks where their milestones stand, or wants a milestone plan extracted from PROJE.md or the conversation and loaded onto the stone.
+description: Reads and updates the milestones.json file of the Milestone Stone desktop widget, on the local disk or in a GitHub repository (cloud mode, updated by commit). Use when the user says things like "M3 is done" / "M3 bitti", marks a checklist item as done, pauses or resumes a milestone, asks where their milestones stand, or wants a milestone plan extracted from PROJE.md or the conversation and loaded onto the stone.
 ---
 
 # Milestone Stone
@@ -8,6 +8,7 @@ description: Reads and updates the milestones.json file of the Milestone Stone d
 A small stone sits on the user's desktop and shows the active milestone. Its single source of truth is a JSON file. This skill reads that file and writes it following the rules below. The widget notices the change within about a second and refreshes the stone by itself.
 
 - File: `%USERPROFILE%\.milestone-stone\milestones.json` (macOS/Linux: `~/.milestone-stone/milestones.json`). To be sure: `node <skill dir>/scripts/stone.js path`
+- If you cannot reach the user's disk (claude.ai cloud project, Claude Code on the web), the file lives in a GitHub repository instead: see **Cloud mode** below.
 - Schema: summary below. Full version in the repo's `SCHEMA.md` and `milestones.schema.json`.
 - Talk to the user in their language (Turkish for this user). Keep the JSON's own text (titles, items, retro) in the language the user writes them in.
 
@@ -18,7 +19,22 @@ A small stone sits on the user's desktop and shows the active milestone. Its sin
 3. Write the new content to a temp file (e.g. `milestones.new.json` in the OS temp dir) and run `node scripts/stone.js apply <that file>`. The script validates, sets `updatedAt` / `updatedBy: "skill"` and writes atomically (temp file + rename). If validation fails, fix the content; never write the file another way.
 4. Tell the user in one or two sentences what changed.
 
-Without Node: follow the same rules by hand and replace `milestones.json` by writing a temp file in the same folder and renaming it. In a claude.ai chat with no file access, give the full updated JSON and tell the user where the file lives.
+Without Node: follow the same rules by hand and replace `milestones.json` by writing a temp file in the same folder and renaming it. With neither disk nor GitHub access, give the full updated JSON and tell the user where the file lives.
+
+## Cloud mode (file in a GitHub repository)
+
+The widget can pull `milestones.json` from a GitHub repository every few minutes (default 5). Then the file in the repository is the source of truth and you update it with a commit.
+
+1. Find the repository, path and branch: from the user, project notes or memory. They match `github.repo`, `github.path` (default `milestones.json`) and `github.branch` (default `main`) in the user's `%USERPROFILE%\.milestone-stone\config.json`.
+2. Start from the latest commit: `git clone --depth 1 -b <branch> https://github.com/<repo>`, or `git pull` in an existing clone.
+3. Do the operation as above, pointing the script at the file in the clone: `MILESTONE_STONE_FILE=<clone>/<path> node scripts/stone.js show | cat | apply <new.json>`.
+4. Commit only that file, directly to that branch (the widget does not see other branches or open pull requests), with a short message such as `stone: seal M2` or `stone: M1 item done`, and push.
+5. If the push is rejected because the branch moved, do not merge by hand: pull again and redo the change from step 3.
+6. Tell the user the stone will update within the polling interval (a few minutes).
+
+Without git, with a GitHub API or connector: read the file and its `sha`, apply the same rules, and write the full new content with that `sha`. If GitHub rejects the `sha` as stale, read again and redo the change.
+
+In this mode the widget never writes to GitHub. Ticks the user makes on the stone stay local and are never removed by a pull: when your commit arrives, any item already done on the stone stays done. So keep item texts stable when you edit the plan (a renamed item loses its local tick), and when the user tells you an item is done, tick it in the repository too.
 
 ## Schema summary (version 1)
 
@@ -83,3 +99,4 @@ Do not touch sealed (`done`) milestones; ask first if the user wants to change o
 - Change anything about how the stone looks (index.html) from this skill.
 - Seal a milestone or change the plan without the user's approval.
 - Write `milestones.json` piece by piece; always write the full content atomically.
+- In cloud mode, commit anything other than the milestones file, or commit to a branch the widget does not read.

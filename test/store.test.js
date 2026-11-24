@@ -10,6 +10,10 @@ const { createStore, validate } = require('../store');
 const TEMPLATE = path.join(__dirname, '..', 'milestones.json');
 const STONE = path.join(__dirname, '..', 'skills', 'milestone-stone', 'scripts', 'stone.js');
 
+test('stone.js exists where the tests expect it', () => {
+    assert.ok(fs.existsSync(STONE), `missing: ${STONE}`);
+});
+
 function tmpStore() {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'stone-'));
     const dataFile = path.join(dir, 'milestones.json');
@@ -88,6 +92,10 @@ test('stone.js refuses to write an invalid file', () => {
     const s = JSON.parse(before);
     s.milestones[1].status = 'active';     // two active milestones
     fs.writeFileSync(bad, JSON.stringify(s));
-    assert.throws(() => execFileSync(process.execPath, [STONE, 'apply', bad], { env: { ...process.env, MILESTONE_STONE_FILE: dataFile }, stdio: 'pipe' }));
+    assert.throws(
+        () => execFileSync(process.execPath, [STONE, 'apply', bad], { env: { ...process.env, MILESTONE_STONE_FILE: dataFile }, stdio: 'pipe' }),
+        // Must fail because of validation, not because stone.js is missing
+        err => String(err.stderr).includes('not written, does not match schema')
+    );
     assert.strictEqual(fs.readFileSync(dataFile, 'utf8'), before);
 });

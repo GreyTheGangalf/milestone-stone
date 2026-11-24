@@ -52,6 +52,18 @@ At runtime the file lives at `%USERPROFILE%\.milestone-stone\milestones.json` (`
 - The widget does not treat its own writes as external changes; it decides by content, not by timing.
 - If the skill changed the file and the widget has not loaded it yet, the widget does not overwrite it with stale state; it refreshes the stone first. That one click may be lost, the skill's change is not.
 
-## Later: pulling from GitHub
+## GitHub mode
 
-For cloud projects the widget may read the file from a GitHub repository. The schema is ready for that: the content is valid wherever the file lives, `updatedAt`/`updatedBy` tell which copy is newer, and since unknown fields are kept, sync metadata can be added. Not implemented in this version.
+For cloud projects, where Claude cannot write to the user's disk, the file can live in a GitHub repository and be updated with commits. The widget pulls it every few minutes when `%USERPROFILE%\.milestone-stone\config.json` says so (see `config.example.json`):
+
+```json
+{ "source": "github", "github": { "repo": "owner/name", "path": "milestones.json", "branch": "main", "intervalMinutes": 5, "token": "" } }
+```
+
+- `path`, `branch` and `intervalMinutes` are optional (defaults shown; at least 1 minute). `token` is only needed for a private repo; a fine-grained token with read-only "Contents" access to that one repo is enough. It can also come from the `MILESTONE_STONE_GITHUB_TOKEN` environment variable.
+- The repository brings the plan (milestones, items, texts, statuses). The local `milestones.json` is updated only when the remote file changes (and once at startup), so the rules above (schema, `.bak`, refresh) still apply.
+- The widget uses the GitHub contents API with ETag; an unchanged file costs a `304` and no download.
+- Content that does not match the schema is not applied.
+- On a network or HTTP error the stone keeps the last valid state; the next try is pushed back (doubling, at most 30 minutes). After the computer wakes from sleep it pulls right away.
+- Ticks are never lost: an item that is `done` locally stays `done` when a new remote file arrives (matched by milestone id and item text). Ticks committed to the repository arrive too. Unticking locally an item that is ticked in the repository does not last.
+- Clicks on the stone are saved locally only; the widget never writes to GitHub.

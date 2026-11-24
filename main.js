@@ -1,14 +1,18 @@
 // Milestone Stone — Windows desktop widget (Electron)
-const { app, BrowserWindow, ipcMain, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, screen, net, powerMonitor } = require('electron');
 const os = require('os');
 const path = require('path');
 const fs = require('fs');
 const { createStore } = require('./store');
+const { loadConfig, createGithubPoller } = require('./remote');
 
 // The state file lives in a fixed place so the skill can read and write it too:
 // %USERPROFILE%\.milestone-stone\milestones.json
 const DATA_DIR = path.join(os.homedir(), '.milestone-stone');
 const DATA_FILE = path.join(DATA_DIR, 'milestones.json');
+// Optional: %USERPROFILE%\.milestone-stone\config.json switches to GitHub mode.
+// Without it the widget works on the local file only. See config.example.json.
+const CONFIG_FILE = path.join(DATA_DIR, 'config.json');
 
 const store = createStore({
   dataFile: DATA_FILE,
@@ -16,6 +20,7 @@ const store = createStore({
 });
 
 let win;
+let poller = null;
 
 function createWindow() {
   const settings = store.init().settings || {};
@@ -38,6 +43,28 @@ function createWindow() {
   fs.watchFile(DATA_FILE, { interval: 1000 }, () => {
     if (store.checkExternalChange()) notifyExternalChange();
   });
+
+  startGithubSource();
+}
+
+// GitHub mode: pull the file from a repository every few minutes and write it
+// over the local file. The local file stays the cache, so on a network error
+// or offline start the stone shows the last state it had.
+function startGithubSource() {
+  let config;
+  try { config = loadConfig(CONFIG_FILE); }
+  catch (e) { console.warn(`[milestone-stone] ${CONFIG_FILE} ignored, staying in local mode: ${e.message}`); return; }
+  if (!config) return;
+
+  poller = createGithubPoller({
+    config,
+    dataFile: DATA_FILE,
+    fetch: net.fetch,   // Chromium's network stack: follows the Windows proxy settings
+    onUpdate: () => { if (store.checkExternalChange()) notifyExternalChange(); }
+  });
+  poller.start();
+  powerMonitor.on('resume', () => poller.pollNow());
+  console.log(`[milestone-stone] GitHub mode: ${config.repo}/${config.path} (${config.branch}), every ${config.intervalMinutes} min`);
 }
 
 function notifyExternalChange() {
@@ -59,3 +86,4 @@ ipcMain.on('quit', () => app.quit());
 
 app.whenReady().then(createWindow);
 app.on('window-all-closed', () => app.quit());
+app.on('before-quit', () => { if (poller) poller.stop(); });
