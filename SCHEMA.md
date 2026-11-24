@@ -12,7 +12,7 @@ At runtime the file lives at `%USERPROFILE%\.milestone-stone\milestones.json` (`
 | `project` | string | no | Project name. |
 | `updatedAt` | ISO date or `null` | no | When the file was last written (UTC). |
 | `updatedBy` | `"widget"`, `"skill"`, `"manual"` or `null` | no | Who wrote it last. |
-| `settings.alwaysOnTop` | boolean | no (default `true`) | When `false`, the stone stays behind other windows. |
+| `settings.alwaysOnTop` | boolean | no | Ignored since v0.4. The widget keeps window settings in `prefs.json` on each computer and changes them from the tray menu. Kept here so older files stay valid. |
 | `settings.staleDays` | integer | no (default 5) | Days without progress before the ring starts to pulse. |
 | `current` | integer | no (default 0) | Index of the milestone on the front of the stone. `milestones.length` when all are sealed. |
 | `milestones` | array | **yes** | At least one milestone. |
