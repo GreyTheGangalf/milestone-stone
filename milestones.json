@@ -1,0 +1,115 @@
+{
+  "project": "Türkiye Halüsinasyon Haritası",
+  "settings": {
+    "alwaysOnTop": true,
+    "staleDays": 5
+  },
+  "current": 0,
+  "milestones": [
+    {
+      "id": "M0",
+      "title": "Kurulum",
+      "status": "active",
+      "items": [
+        { "text": "Repo iskeleti hazır", "done": false },
+        { "text": "API anahtarları ve harcama limitleri ayarlı", "done": false },
+        { "text": "Tek script 3 modele aynı soruyu sorup cevapları kaydediyor", "done": false }
+      ],
+      "lastProgress": null,
+      "doneAt": null,
+      "retro": ""
+    },
+    {
+      "id": "M1",
+      "title": "İlçe verisi ve örneklem",
+      "status": "pending",
+      "items": [
+        { "text": "Wikidata sorgusu çalışıyor", "done": false },
+        { "text": "200 ilçelik dengeli örneklem CSV'si hazır", "done": false },
+        { "text": "20 satır elle kontrol edildi", "done": false }
+      ],
+      "lastProgress": null,
+      "doneAt": null,
+      "retro": ""
+    },
+    {
+      "id": "M2",
+      "title": "Soru seti",
+      "status": "pending",
+      "items": [
+        { "text": "6 soru tipine karar verildi", "done": false },
+        { "text": "~1.200 soru ve otomatik doğru cevaplar üretildi", "done": false },
+        { "text": "Güven puanı ve 'bilmiyorum' seçeneği eklendi", "done": false },
+        { "text": "50 cevap elle kontrol edildi", "done": false }
+      ],
+      "lastProgress": null,
+      "doneAt": null,
+      "retro": ""
+    },
+    {
+      "id": "M3",
+      "title": "Pilot · Karar kapısı 1",
+      "status": "pending",
+      "items": [
+        { "text": "10 ilçe × 3 model çalıştı", "done": false },
+        { "text": "Maliyet tahmini çıktı", "done": false },
+        { "text": "Puanlama 100 örnekte elle doğrulandı", "done": false },
+        { "text": "Karar verildi: devam mı, M2'ye dönüş mü?", "done": false }
+      ],
+      "lastProgress": null,
+      "doneAt": null,
+      "retro": ""
+    },
+    {
+      "id": "M4",
+      "title": "Tam çalıştırma",
+      "status": "pending",
+      "items": [
+        { "text": "~3.600 çağrı tamamlandı", "done": false },
+        { "text": "Ham çıktılar kaydedildi ve puanlandı", "done": false }
+      ],
+      "lastProgress": null,
+      "doneAt": null,
+      "retro": ""
+    },
+    {
+      "id": "M5",
+      "title": "Analiz · Karar kapısı 2",
+      "status": "pending",
+      "items": [
+        { "text": "Doğruluk, 'bilmiyorum' oranı ve yanlışlardaki güven hesaplandı", "done": false },
+        { "text": "Bölgesel dağılım çıkarıldı", "done": false },
+        { "text": "Ana bulgu tek cümleyle yazıldı", "done": false },
+        { "text": "Karar verildi: paper mı?", "done": false }
+      ],
+      "lastProgress": null,
+      "doneAt": null,
+      "retro": ""
+    },
+    {
+      "id": "M6",
+      "title": "Yayın",
+      "status": "pending",
+      "items": [
+        { "text": "Veri seti açıklamasıyla HuggingFace'te", "done": false },
+        { "text": "Statik harita hazır", "done": false },
+        { "text": "Türkçe ve İngilizce yazı yayında", "done": false }
+      ],
+      "lastProgress": null,
+      "doneAt": null,
+      "retro": ""
+    },
+    {
+      "id": "M7",
+      "title": "Paper (isteğe bağlı)",
+      "status": "pending",
+      "items": [
+        { "text": "Taslak yazıldı", "done": false },
+        { "text": "Gönderildi", "done": false }
+      ],
+      "lastProgress": null,
+      "doneAt": null,
+      "retro": ""
+    }
+  ]
+}
