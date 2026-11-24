@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/GreyTheGangalf/milestone-stone/milestones.schema.json",
+  "title": "Milestone Taşı durum dosyası",
+  "description": "Widget ve skill'in birlikte okuyup yazdığı milestones.json. Ayrıntılar: SEMA.md",
+  "type": "object",
+  "required": ["milestones"],
+  "properties": {
+    "schemaVersion": { "const": 1, "description": "Şema sürümü. Yoksa 1 sayılır." },
+    "project": { "type": "string", "description": "Projenin görünen adı." },
+    "updatedAt": { "type": ["string", "null"], "format": "date-time", "description": "Dosyanın son yazıldığı an (ISO 8601, UTC)." },
+    "updatedBy": { "type": ["string", "null"], "enum": ["widget", "skill", "manual", null], "description": "Son yazan taraf." },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "alwaysOnTop": { "type": "boolean", "default": true },
+        "staleDays": { "type": "integer", "minimum": 1, "default": 5 }
+      },
+      "additionalProperties": true
+    },
+    "current": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Ön yüzde gösterilen milestone'un dizideki sırası. milestones.length ise hepsi mühürlenmiş demektir."
+    },
+    "milestones": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/milestone" }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "milestone": {
+      "type": "object",
+      "required": ["id", "title", "status", "items"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^M[0-9]+$", "description": "M0, M1, ... Taşın ortasında numarası görünür." },
+        "title": { "type": "string" },
+        "status": { "enum": ["pending", "active", "paused", "done"] },
+        "items": {
+          "type": "array",
+          "description": "Milestone'un 'bitti' tanımı.",
+          "items": {
+            "type": "object",
+            "required": ["text", "done"],
+            "properties": {
+              "text": { "type": "string" },
+              "done": { "type": "boolean" },
+              "touched": { "type": "boolean", "description": "Maddeye en az bir kez + ya da − basıldı. Yalnızca − düğmesinin vurgusu için; isteğe bağlı." }
+            },
+            "additionalProperties": true
+          }
+        },
+        "startedAt": { "type": ["string", "null"], "format": "date-time", "description": "Milestone'un aktif olduğu an." },
+        "lastProgress": { "type": ["string", "null"], "format": "date-time", "description": "Son madde değişikliği." },
+        "doneAt": { "type": ["string", "null"], "format": "date-time", "description": "Mühürlendiği an." },
+        "retro": { "type": "string", "description": "Mühürlerken yazılan geriye bakış notu." }
+      },
+      "additionalProperties": true
+    }
+  }
+}

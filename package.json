@@ -1,10 +1,11 @@
 {
   "name": "milestone-stone",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Masaüstü kenarında duran milestone taşı",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "test": "node --test test/*.test.js"
   },
   "devDependencies": {
     "electron": "latest"

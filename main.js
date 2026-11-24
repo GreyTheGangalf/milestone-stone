@@ -1,28 +1,24 @@
 // Milestone Taşı — Windows masaüstü widget'ı (Electron)
 const { app, BrowserWindow, ipcMain, screen } = require('electron');
-const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const fs = require('fs');
+const { createStore } = require('./store');
 
-// Durum dosyası sabit bir yerde durur ki ileride skill de okuyup yazabilsin:
+// Durum dosyası sabit bir yerde durur ki skill de okuyup yazabilsin:
 // %USERPROFILE%\.milestone-stone\milestones.json
 const DATA_DIR = path.join(os.homedir(), '.milestone-stone');
 const DATA_FILE = path.join(DATA_DIR, 'milestones.json');
 
-function ensureData() {
-  if (!fs.existsSync(DATA_FILE)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-    fs.copyFileSync(path.join(__dirname, 'milestones.json'), DATA_FILE);
-  }
-}
-function readState() { return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); }
+const store = createStore({
+  dataFile: DATA_FILE,
+  templateFile: path.join(__dirname, 'milestones.json')
+});
 
 let win;
-let lastWrite = 0;
 
 function createWindow() {
-  ensureData();
-  const settings = readState().settings || {};
+  const settings = store.init().settings || {};
   const W = 340, H = 500, M = 8;
   const { x, y, width, height } = screen.getPrimaryDisplay().workArea;
 
@@ -37,16 +33,24 @@ function createWindow() {
   win.setIgnoreMouseEvents(true, { forward: true });
   win.loadFile('index.html');
 
-  // Dosya dışarıdan (ör. skill tarafından) değişirse taşı güncelle
+  // Dosya dışarıdan (ör. skill tarafından) değişirse taşı güncelle.
+  // Widget'ın kendi yazdığı içerik ve yarım/bozuk dosyalar store tarafından elenir.
   fs.watchFile(DATA_FILE, { interval: 1000 }, () => {
-    if (Date.now() - lastWrite > 1500 && win && !win.isDestroyed()) win.webContents.send('external-change');
+    if (store.checkExternalChange()) notifyExternalChange();
   });
 }
 
-ipcMain.handle('load', () => readState());
+function notifyExternalChange() {
+  if (win && !win.isDestroyed()) win.webContents.send('external-change');
+}
+
+ipcMain.handle('load', () => store.read());
 ipcMain.handle('save', (_e, state) => {
-  lastWrite = Date.now();
-  fs.writeFileSync(DATA_FILE, JSON.stringify(state, null, 2), 'utf8');
+  // Skill dosyayı yazdı ama widget bunu henüz yüklemediyse, eski durumla
+  // üzerine yazıp skill'in değişikliğini silme: önce taşı yenile.
+  if (store.checkExternalChange()) { notifyExternalChange(); return { ok: false, reason: 'conflict' }; }
+  try { store.write(state); return { ok: true }; }
+  catch (e) { console.warn('[milestone-stone]', e.message); return { ok: false, reason: e.message }; }
 });
 ipcMain.on('set-ignore', (_e, ignore) => {
   if (win) win.setIgnoreMouseEvents(ignore, { forward: true });
