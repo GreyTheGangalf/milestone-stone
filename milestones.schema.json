@@ -1,0 +1,151 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/GreyTheGangalf/milestone-stone/milestones.schema.json",
+    "title": "Milestone Stone state file",
+    "description": "milestones.json, read and written by both the widget and the skill. Details: SCHEMA.md",
+    "type": "object",
+    "required": [
+        "milestones"
+    ],
+    "properties": {
+        "schemaVersion": {
+            "const": 1,
+            "description": "Schema version. Treated as 1 when missing."
+        },
+        "project": {
+            "type": "string",
+            "description": "Display name of the project."
+        },
+        "updatedAt": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "format": "date-time",
+            "description": "When the file was last written (ISO 8601, UTC)."
+        },
+        "updatedBy": {
+            "type": [
+                "string",
+                "null"
+            ],
+            "enum": [
+                "widget",
+                "skill",
+                "manual",
+                null
+            ],
+            "description": "Who wrote the file last."
+        },
+        "settings": {
+            "type": "object",
+            "properties": {
+                "alwaysOnTop": {
+                    "type": "boolean",
+                    "default": true
+                },
+                "staleDays": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "default": 5
+                }
+            },
+            "additionalProperties": true
+        },
+        "current": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Index of the milestone shown on the front of the stone. Equal to milestones.length when all are sealed."
+        },
+        "milestones": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "#/$defs/milestone"
+            }
+        }
+    },
+    "additionalProperties": true,
+    "$defs": {
+        "milestone": {
+            "type": "object",
+            "required": [
+                "id",
+                "title",
+                "status",
+                "items"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "pattern": "^M[0-9]+$",
+                    "description": "M0, M1, ... The number is shown in the middle of the stone."
+                },
+                "title": {
+                    "type": "string"
+                },
+                "status": {
+                    "enum": [
+                        "pending",
+                        "active",
+                        "paused",
+                        "done"
+                    ]
+                },
+                "items": {
+                    "type": "array",
+                    "description": "The milestone's definition of done.",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "text",
+                            "done"
+                        ],
+                        "properties": {
+                            "text": {
+                                "type": "string"
+                            },
+                            "done": {
+                                "type": "boolean"
+                            },
+                            "touched": {
+                                "type": "boolean",
+                                "description": "Set once + or − was pressed on the item. Only highlights the − button; optional."
+                            }
+                        },
+                        "additionalProperties": true
+                    }
+                },
+                "startedAt": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "format": "date-time",
+                    "description": "When the milestone became active."
+                },
+                "lastProgress": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "format": "date-time",
+                    "description": "Last item change."
+                },
+                "doneAt": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "format": "date-time",
+                    "description": "When it was sealed."
+                },
+                "retro": {
+                    "type": "string",
+                    "description": "Retrospective note written when sealing."
+                }
+            },
+            "additionalProperties": true
+        }
+    }
+}
