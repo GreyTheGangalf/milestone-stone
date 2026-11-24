@@ -1,0 +1,10 @@
+{
+    "source": "github",
+    "github": {
+        "repo": "owner/name",
+        "path": "milestones.json",
+        "branch": "main",
+        "intervalMinutes": 5,
+        "token": ""
+    }
+}

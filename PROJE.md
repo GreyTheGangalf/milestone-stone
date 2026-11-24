@@ -6,11 +6,12 @@ Masaüstünün kenarında duran, projenin aktif milestone'unu gösteren küçük
 
 ## Mimari
 
-- **`milestones.json`**: tek doğruluk kaynağı. Konumu `%USERPROFILE%\.milestone-stone\milestones.json`.
+- **`milestones.json`**: tek doğruluk kaynağı. Konumu `%USERPROFILE%\.milestone-stone\milestones.json`. GitHub modunda doğruluk kaynağı depodaki dosya, yereldeki önbellek.
 - **Widget (Electron)**: dosyayı okur, taşı çizer, + / − ve mühürleme işlemlerini dosyaya yazar. Dosya dışarıdan değişirse kendini yeniler.
   - `main.js`: şeffaf, çerçevesiz, sağ alt köşede duran pencere; taşın dışında kalan alanda tıklamalar masaüstüne geçer.
   - `preload.js`: arayüz ile dosya sistemi arasındaki köprü.
   - `store.js`: dosyayı güvenle okuyup atomik yazan katman (bozuk JSON'da çökmez, yedek tutar). `npm test` ile denenir.
+  - `remote.js`: isteğe bağlı GitHub modu. `config.json` varsa dosyayı depodan çekip yerel dosyanın üstüne yazar; yerel dosya önbellek olarak kalır.
   - `index.html`: taş tasarımı (SVG), büyüme ve dönme animasyonu, mantık.
 - **Şema**: `SCHEMA.md` ve `milestones.schema.json` (sürüm 1).
 - **Skill v0** (`skills/milestone-stone`): Claude ile konuşurken aynı JSON dosyasını okuyup yazar. "M0 bitti" denince retroyu yürütür ve taşı mühürler; PROJE.md'den ya da konuşmadan plan çıkarabilir. `scripts/stone.js` dosyayı doğrulayıp atomik yazar.
@@ -28,10 +29,12 @@ Masaüstünün kenarında duran, projenin aktif milestone'unu gösteren küçük
 
 **v0.2 (2026-11-24):** Bozuk/yarım JSON'a dayanıklılık, atomik yazma, içeriğe dayalı dış değişiklik algılama; yazılı şema; Skill v0. Widget ile skill'in birlikte çalışması gerçek Windows'ta henüz denenmedi.
 
+**v0.3 (2026-11-24):** GitHub modu: `config.json` ile widget dosyayı bir GitHub deposundan birkaç dakikada bir çeker (`remote.js`, ETag ile hafif). Skill bulutta dosyayı commit'le günceller. Yerel mod aynen çalışıyor. Gerçek bir depoyla Windows'ta henüz denenmedi.
+
 ## Yol haritası (öncelik sırasıyla)
 
 1. **Windows'ta gerçek test**: şeffaflık, tıklama geçişi, alwaysOnTop davranışı.
-2. ~~**Skill v0**~~ (v0.2'de yapıldı). Sıradaki: **bulut projeleri için GitHub'dan çekme** — widget dosyayı bir depodan okusun (şema buna hazır, bkz. SCHEMA.md).
+2. ~~**Skill v0**~~ (v0.2) ve ~~**GitHub'dan çekme**~~ (v0.3) yapıldı. İleride belki: taştaki tikleri de depoya yazmak (token'a yazma izni gerekir). Şimdilik taş depoya yazmaz, yerel tikler çekmede korunur.
 3. **Taşı sürükleyip konumlandırma**, konumu ayarlarda saklama.
 4. **Windows açılışında otomatik başlatma.**
 5. **Mühürleme anı**: daha güçlü bir parlama ve kısa bir ses (isteğe bağlı).
