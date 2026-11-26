@@ -1,4 +1,5 @@
-// Milestone Stone — preferences of the widget on this computer.
+// Milestone Stone — preferences of the widget on this computer
+// (size, position, always on top, notifications, sound).
 // Kept in %USERPROFILE%\.milestone-stone\prefs.json, separate from
 // milestones.json: in GitHub mode milestones.json is replaced by the copy in
 // the repository, and window settings should not travel with the plan.
@@ -15,9 +16,14 @@ const SCALE_STEP = 0.05;   // one Ctrl + mouse wheel notch
 const DEFAULTS = {
     scale: SIZES.medium,
     alwaysOnTop: false,     // the stone stays on the desktop and goes behind windows
-    hidden: false,          // hidden to the tray
-    notifications: true     // notify when a milestone is completed from outside
+    notifications: true,    // notify when a milestone is completed from outside
+    sound: true,            // short sound when a stone is sealed
+    position: null          // null: bottom right corner. Otherwise distance of the
+                            // window's right and bottom edges from the right and
+                            // bottom edges of the primary screen's work area.
 };
+// Since v0.5 the stone always shows when the app starts, so "hidden" is no
+// longer saved. An old prefs.json that still has it is read without error.
 
 // Keeps a scale inside the allowed range and rounds it to whole percents.
 function clampScale(value) {
@@ -32,13 +38,22 @@ function sizeName(scale) {
     return null;
 }
 
+function normalizePosition(pos) {
+    if (!pos || typeof pos !== 'object') return null;
+    const right = Number(pos.right), bottom = Number(pos.bottom);
+    if (!Number.isFinite(right) || !Number.isFinite(bottom)) return null;
+    return { right: Math.round(right), bottom: Math.round(bottom) };
+}
+
 // Fills in defaults and drops values of the wrong type. Unknown keys are kept.
 function normalizePrefs(raw) {
     const p = raw && typeof raw === 'object' && !Array.isArray(raw) ? { ...raw } : {};
     p.scale = p.scale === undefined ? DEFAULTS.scale : clampScale(p.scale);
-    for (const key of ['alwaysOnTop', 'hidden', 'notifications']) {
+    for (const key of ['alwaysOnTop', 'notifications', 'sound']) {
         if (typeof p[key] !== 'boolean') p[key] = DEFAULTS[key];
     }
+    p.position = normalizePosition(p.position);
+    delete p.hidden;
     return p;
 }
 
@@ -57,4 +72,4 @@ function savePrefs(file, prefs) {
     atomicWrite(file, JSON.stringify(normalizePrefs(prefs), null, 2));
 }
 
-module.exports = { SIZES, MIN_SCALE, MAX_SCALE, SCALE_STEP, DEFAULTS, clampScale, sizeName, normalizePrefs, loadPrefs, savePrefs };
+module.exports = { SIZES, MIN_SCALE, MAX_SCALE, SCALE_STEP, DEFAULTS, clampScale, sizeName, normalizePosition, normalizePrefs, loadPrefs, savePrefs };

@@ -4,7 +4,7 @@ const assert = require('node:assert');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { SIZES, MIN_SCALE, MAX_SCALE, DEFAULTS, clampScale, sizeName, loadPrefs, savePrefs } = require('../prefs');
+const { SIZES, MIN_SCALE, MAX_SCALE, DEFAULTS, clampScale, sizeName, normalizePosition, loadPrefs, savePrefs } = require('../prefs');
 
 function tmpFile() {
     return path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'stone-prefs-')), 'prefs.json');
@@ -37,13 +37,25 @@ test('presets are recognised, other scales are custom', () => {
 
 test('save and load round trip, wrong types fall back, unknown keys stay', () => {
     const file = tmpFile();
-    savePrefs(file, { scale: 1.3, alwaysOnTop: true, hidden: 'yes', future: 42 });
+    savePrefs(file, { scale: 1.3, alwaysOnTop: true, sound: 'yes', future: 42, position: { right: 120.4, bottom: 40 } });
     const p = loadPrefs(file);
     assert.strictEqual(p.scale, 1.3);
     assert.strictEqual(p.alwaysOnTop, true);
-    assert.strictEqual(p.hidden, false);
+    assert.strictEqual(p.sound, true);
     assert.strictEqual(p.notifications, true);
     assert.strictEqual(p.future, 42);
+    assert.deepStrictEqual(p.position, { right: 120, bottom: 40 });
+});
+
+test('an old "hidden" value is dropped: the stone always shows at start', () => {
+    const file = tmpFile();
+    fs.writeFileSync(file, '{"hidden": true}');
+    assert.ok(!('hidden' in loadPrefs(file)));
+});
+
+test('a broken position falls back to the corner', () => {
+    assert.strictEqual(normalizePosition({ right: 'a', bottom: 3 }), null);
+    assert.strictEqual(normalizePosition(5), null);
 });
 
 test('a prefs file with a BOM is read', () => {
